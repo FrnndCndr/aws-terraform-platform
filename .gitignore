@@ -1,0 +1,12 @@
+.terraform/
+*.tfstate*
+*.tfvars
+!clientes/ejemplo/*.tfvars
+.env
+crash.log
+override.tf
+.terraformrc
+plans/
+.vscode/
+.claude/
+CLAUDE.md
