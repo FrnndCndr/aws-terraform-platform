@@ -4,7 +4,8 @@
 
 | Nombre | Tipo | Obligatoria | Valor por defecto | Descripción |
 |---|---|---|---|---|
-| `name_prefix` | `string` | Sí | — | Prefijo de los nombres, con la forma `<client>-<environment>`. |
+| `product` | `string` | Sí | — | Producto SaaS. Forma parte de cada nombre. Ver `docs/architecture/naming.md`. |
+| `environment` | `string` | Sí | — | Entorno: `dev` o `prod`. Forma parte de cada nombre. |
 | `cors_allowed_origins` | `list(string)` | No | `[]` | Orígenes del navegador autorizados, por ejemplo `https://dev.ejemplo.cl`. Vacío no crea regla CORS. |
 | `versioning_enabled` | `bool` | No | `false` | Conserva las versiones anteriores de cada archivo. |
 | `noncurrent_version_expiration_days` | `number` | No | `90` | Con versionado, días que se conserva una versión anterior. |
@@ -20,4 +21,4 @@
 
 ## Nombre del bucket
 
-`<name_prefix>-uploads-<account_id>`. El id de cuenta se obtiene de la sesión activa.
+`s3-<product>-upload-files-<environment>-<account_id>`. El id de cuenta se obtiene de la sesión activa.
