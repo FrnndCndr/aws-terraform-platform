@@ -45,7 +45,10 @@
 | `backend_memory` | `number` | No | `512` | Memoria de la tarea, en MB. |
 | `backend_cpu_architecture` | `string` | No | `X86_64` | `X86_64` o `ARM64`. |
 | `backend_desired_count` | `number` | No | `1` | Cantidad de tareas. |
-| `backend_environment` | `map(string)` | No | `{}` | Variables de entorno adicionales del backend. |
+| `backend_environment` | `map(string)` | No | `{}` | Variables de entorno adicionales del backend, no secretas. |
+| `backend_env_names` | `object` | No | Nombres de la tabla de abajo | Nombres con que el backend recibe los datos de la base y del bucket. Cada campo es opcional. |
+| `backend_secrets` | `list(string)` | No | `[]` | Variables de entorno que se leen de un secreto creado vacío en Secrets Manager, por ejemplo `JWT_KEY`. |
+| `secrets_recovery_window_days` | `number` | No | `7` | Días que AWS conserva un secreto borrado. `0` en entornos de prueba. |
 | `backend_health_check` | `object` | No | `null` | Health check del contenedor. Ver `ecs-service`. |
 | `backend_enable_execute_command` | `bool` | No | `false` | Permite abrir una terminal en el contenedor con ECS Exec. |
 | `ecr_image_tag_mutability` | `string` | No | `MUTABLE` | `MUTABLE` o `IMMUTABLE`. |
@@ -78,16 +81,37 @@
 
 ## Variables de entorno que recibe el backend
 
-| Variable | Origen |
-|---|---|
-| `DB_HOST` | Dirección de la base |
-| `DB_PORT` | Puerto de la base |
-| `DB_NAME` | Nombre de la base |
-| `DB_USERNAME` | Secreto de la base, campo `username` |
-| `DB_PASSWORD` | Secreto de la base, campo `password` |
-| `UPLOADS_BUCKET` | Nombre del bucket de archivos |
+| Campo de `backend_env_names` | Nombre por defecto | Origen |
+|---|---|---|
+| `db_host` | `DB_HOST` | Dirección de la base |
+| `db_port` | `DB_PORT` | Puerto de la base |
+| `db_name` | `DB_NAME` | Nombre de la base |
+| `db_username` | `DB_USERNAME` | Secreto de la base, campo `username` |
+| `db_password` | `DB_PASSWORD` | Secreto de la base, campo `password` |
+| `uploads_bucket` | `UPLOADS_BUCKET` | Nombre del bucket de archivos |
 
-`backend_environment` agrega más variables. Si repite un nombre de esta tabla, prevalece el de la tabla. ECS agrega por su cuenta `AWS_REGION`.
+Cada aplicación usa sus propios nombres: `backend_env_names` los cambia sin tocar el código de la aplicación. Por ejemplo, para una aplicación que lee las variables de la imagen oficial de PostgreSQL:
+
+```hcl
+backend_env_names = {
+  db_host        = "POSTGRES_HOST"
+  db_port        = "POSTGRES_PORT"
+  db_name        = "POSTGRES_DB"
+  db_username    = "POSTGRES_USER"
+  db_password    = "POSTGRES_PASSWORD"
+  uploads_bucket = "AWS_S3_BUCKET"
+}
+```
+
+Además recibe:
+
+| Origen | Variables |
+|---|---|
+| `backend_secrets` | Una por nombre de la lista, con el valor cargado a mano en Secrets Manager |
+| `backend_environment` | Las variables no secretas de la aplicación |
+| ECS | `AWS_REGION` |
+
+Si `backend_environment` repite un nombre de la tabla de arriba, prevalece el de la tabla. Nada secreto va en `backend_environment`: queda en texto plano en la definición de la tarea.
 
 ## Salidas
 
