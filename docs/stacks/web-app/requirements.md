@@ -25,6 +25,7 @@ El stack es lo que se aplica. Los módulos no se aplican por separado.
 | Backend en contenedores | `ecs-service` | Incluido |
 | Base de datos | `rds-postgres` | Incluido |
 | Bucket de archivos | `uploads-bucket` | Incluido |
+| Secretos de la aplicación | `app-secrets` | Incluido |
 | Certificado del dominio propio | `acm-certificate` | Incluido, opcional |
 
 ## Costo
