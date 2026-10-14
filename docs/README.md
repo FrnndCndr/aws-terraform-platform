@@ -21,6 +21,7 @@ Cada módulo tiene tres documentos: `requirements.md` (qué debe hacer), `interf
 - [rds-postgres](modules/rds-postgres/requirements.md): base de datos PostgreSQL.
 - [uploads-bucket](modules/uploads-bucket/requirements.md): bucket de archivos subidos por los usuarios.
 - [acm-certificate](modules/acm-certificate/requirements.md): certificado HTTPS de un dominio propio.
+- [app-secrets](modules/app-secrets/requirements.md): secretos de la aplicación, creados vacíos.
 
 ## Stacks
 
