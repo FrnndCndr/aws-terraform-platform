@@ -3,8 +3,15 @@ data "aws_region" "current" {}
 data "aws_partition" "current" {}
 
 locals {
-  full_name   = "${var.name_prefix}-${var.service_name}"
-  secret_arns = distinct([for secret in values(var.secrets) : secret.secret_arn])
+  cluster_name        = "ecs-${var.product}-${var.environment}"
+  service_full_name   = "ecs-${var.product}-${var.service_name}-${var.environment}"
+  task_family         = "task-${var.product}-${var.service_name}-${var.environment}"
+  execution_role_name = "iam-${var.product}-${var.service_name}-execution-${var.environment}"
+  task_role_name      = "iam-${var.product}-${var.service_name}-task-${var.environment}"
+  security_group_name = "secgroup-${var.product}-${var.service_name}-${var.environment}"
+  log_group_name      = "/ecs/${var.product}-${var.service_name}-${var.environment}"
+  namespace_name      = "${var.product}-${var.environment}.internal"
+  secret_arns         = distinct([for secret in values(var.secrets) : secret.secret_arn])
 
   container_definition = {
     name      = var.service_name
@@ -20,7 +27,7 @@ locals {
     ]
 
     environment = [
-      for name, value in var.environment : {
+      for name, value in var.container_environment : {
         name  = name
         value = value
       }
@@ -53,7 +60,7 @@ locals {
 }
 
 resource "aws_ecs_cluster" "this" {
-  name = "${var.name_prefix}-cluster"
+  name = local.cluster_name
 
   setting {
     name  = "containerInsights"
@@ -62,7 +69,7 @@ resource "aws_ecs_cluster" "this" {
 }
 
 resource "aws_cloudwatch_log_group" "service" {
-  name              = "/ecs/${local.full_name}"
+  name              = local.log_group_name
   retention_in_days = var.log_retention_days
 }
 
@@ -78,7 +85,7 @@ data "aws_iam_policy_document" "ecs_tasks_assume_role" {
 }
 
 resource "aws_iam_role" "execution" {
-  name               = "${local.full_name}-execution"
+  name               = local.execution_role_name
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role.json
 }
 
@@ -105,7 +112,7 @@ resource "aws_iam_role_policy" "read_secrets" {
 }
 
 resource "aws_iam_role" "task" {
-  name               = "${local.full_name}-task"
+  name               = local.task_role_name
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role.json
 }
 
@@ -138,12 +145,12 @@ resource "aws_iam_role_policy" "execute_command" {
 }
 
 resource "aws_security_group" "service" {
-  name        = local.full_name
+  name        = local.security_group_name
   description = "Tasks of the ${var.service_name} service"
   vpc_id      = var.vpc_id
 
   tags = {
-    Name = local.full_name
+    Name = local.security_group_name
   }
 }
 
@@ -166,8 +173,8 @@ resource "aws_vpc_security_group_ingress_rule" "service" {
 }
 
 resource "aws_service_discovery_private_dns_namespace" "this" {
-  name        = "${var.name_prefix}.internal"
-  description = "Service discovery of ${var.name_prefix}"
+  name        = local.namespace_name
+  description = "Service discovery of ${var.product}-${var.environment}"
   vpc         = var.vpc_id
 }
 
@@ -191,7 +198,7 @@ resource "aws_service_discovery_service" "this" {
 }
 
 resource "aws_ecs_task_definition" "this" {
-  family                   = local.full_name
+  family                   = local.task_family
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = tostring(var.cpu)
@@ -207,7 +214,7 @@ resource "aws_ecs_task_definition" "this" {
 }
 
 resource "aws_ecs_service" "this" {
-  name                   = local.full_name
+  name                   = local.service_full_name
   cluster                = aws_ecs_cluster.this.id
   task_definition        = aws_ecs_task_definition.this.arn
   desired_count          = var.desired_count
