@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 
 resource "aws_s3_bucket" "uploads" {
-  bucket        = "${var.name_prefix}-uploads-${data.aws_caller_identity.current.account_id}"
+  bucket        = "s3-${var.product}-upload-files-${var.environment}-${data.aws_caller_identity.current.account_id}"
   force_destroy = var.force_destroy
 }
 
