@@ -22,3 +22,5 @@ ecr_image_tag_mutability = "MUTABLE"
 ecr_force_delete         = true
 
 log_retention_days = 7
+
+secrets_recovery_window_days = 0
