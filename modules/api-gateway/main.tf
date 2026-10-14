@@ -1,14 +1,17 @@
 locals {
-  name = "${var.name_prefix}-api"
+  api_name            = "apigw-${var.product}-api-${var.environment}"
+  vpc_link_name       = "vpclink-${var.product}-api-${var.environment}"
+  security_group_name = "secgroup-${var.product}-vpc-link-${var.environment}"
+  log_group_name      = "/aws/apigateway/${var.product}-api-${var.environment}"
 }
 
 resource "aws_security_group" "vpc_link" {
-  name        = "${local.name}-vpc-link"
+  name        = local.security_group_name
   description = "VPC link of the HTTP API"
   vpc_id      = var.vpc_id
 
   tags = {
-    Name = "${local.name}-vpc-link"
+    Name = local.security_group_name
   }
 }
 
@@ -22,13 +25,13 @@ resource "aws_vpc_security_group_egress_rule" "vpc_link" {
 }
 
 resource "aws_apigatewayv2_vpc_link" "this" {
-  name               = local.name
+  name               = local.vpc_link_name
   subnet_ids         = var.subnet_ids
   security_group_ids = [aws_security_group.vpc_link.id]
 }
 
 resource "aws_apigatewayv2_api" "this" {
-  name          = local.name
+  name          = local.api_name
   protocol_type = "HTTP"
 }
 
@@ -49,7 +52,7 @@ resource "aws_apigatewayv2_route" "default" {
 }
 
 resource "aws_cloudwatch_log_group" "access" {
-  name              = "/aws/apigateway/${local.name}"
+  name              = local.log_group_name
   retention_in_days = var.log_retention_days
 }
 
