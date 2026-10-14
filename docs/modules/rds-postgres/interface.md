@@ -4,7 +4,8 @@
 
 | Nombre | Tipo | Obligatoria | Valor por defecto | Descripción |
 |---|---|---|---|---|
-| `name_prefix` | `string` | Sí | — | Prefijo de los nombres, con la forma `<client>-<environment>`. |
+| `product` | `string` | Sí | — | Producto SaaS. Forma parte de cada nombre. Ver `docs/architecture/naming.md`. |
+| `environment` | `string` | Sí | — | Entorno: `dev` o `prod`. Forma parte de cada nombre. |
 | `vpc_id` | `string` | Sí | — | VPC de la base. |
 | `subnet_ids` | `list(string)` | Sí | — | Subnets privadas, en al menos dos zonas. |
 | `allowed_security_group_ids` | `map(string)` | No | `{}` | Security groups que pueden conectarse al puerto 5432. Clave: etiqueta descriptiva. |
