@@ -58,6 +58,14 @@ Con `site_domain_name`, el stack busca la zona de Route 53 por su nombre (`dns_z
 
 Los orígenes autorizados por CORS en el bucket de archivos incluyen el dominio de CloudFront y, si existe, el propio.
 
+## La plataforma se adapta a los nombres de cada aplicación
+
+Cada aplicación lee su configuración con sus propios nombres de variables. En lugar de obligar a todas a usar los mismos, el stack expone `backend_env_names`: los datos son siempre los mismos (dirección, puerto, base, usuario, contraseña, bucket) y solo cambia con qué nombre llegan. Una aplicación nueva se integra con un archivo de variables, sin cambios de código en ella ni en la plataforma.
+
+## Secretos de la aplicación
+
+Las llaves de la aplicación (firma de tokens, credenciales de correo u otros servicios) se crean vacías con el módulo `app-secrets` y se cargan a mano. El stack las inyecta junto con las credenciales de la base. El orden en un entorno nuevo es: aplicar, cargar los valores, desplegar la imagen que los usa.
+
 ## Rotación de la contraseña de la base
 
 El backend recibe la contraseña al arrancar. Para que una rotación no lo deje sin conexión, el stack rota la contraseña cada 365 días en vez de cada 7. Antes de acortar ese plazo, el backend debe leer el secreto en tiempo de ejecución.
