@@ -10,7 +10,7 @@ El stack es lo que se aplica. Los módulos no se aplican por separado.
 
 1. Un entorno se describe con un archivo de variables. El mismo código sirve para cualquier cliente y entorno.
 2. Guarda su state en el bucket de la cuenta del cliente, en una ruta propia de ese cliente y entorno.
-3. Todos los recursos llevan el nombre `<client>-<environment>-...` y los tags `client`, `environment`, `project` y `managed_by`.
+3. Todos los recursos siguen el patrón de nombres `<servicio>-<product>-<propósito>-<environment>` y los tags `product`, `client`, `environment`, `project` y `managed_by`.
 4. Se conecta a AWS con el perfil indicado en las variables.
 5. Entrega como salida los datos que necesita el despliegue de la aplicación.
 
