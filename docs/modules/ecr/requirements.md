@@ -6,7 +6,7 @@ Crear el repositorio privado de imágenes de contenedor de un servicio del backe
 
 ## Qué debe cumplir
 
-1. Crea un repositorio ECR con nombre `<name_prefix>-<service_name>`.
+1. Crea un repositorio ECR con nombre `ecr-<product>-<service_name>-<environment>`.
 2. Analiza cada imagen al subirla en busca de vulnerabilidades conocidas.
 3. Conserva solo las últimas imágenes (10 por defecto) y elimina las anteriores.
 4. Entrega como salida la URL del repositorio, que es el destino de `docker push`.
