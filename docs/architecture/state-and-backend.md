@@ -19,16 +19,16 @@ El bucket lo crea el módulo [bootstrap](../modules/bootstrap/requirements.md), 
 Cada combinación de cliente y entorno tiene su propio state, en una ruta (`key`) distinta del bucket:
 
 ```
-<client>/<environment>/terraform.tfstate
+<product>/<environment>/terraform.tfstate
 ```
 
-| Cliente | Entorno | Cuenta AWS | Bucket | Key |
+| Producto | Entorno | Cuenta AWS | Bucket | Key |
 |---|---|---|---|---|
 | ejemplo | dev | cuenta de ejemplo | `tfstate-ejemplo-<account_id>` | `ejemplo/dev/terraform.tfstate` |
 | ejemplo | prod | cuenta de ejemplo | `tfstate-ejemplo-<account_id>` | `ejemplo/prod/terraform.tfstate` |
 | ejemplo | zona DNS (compartida) | cuenta de ejemplo | `tfstate-ejemplo-<account_id>` | `ejemplo/dns-zone/terraform.tfstate` |
 
-Los entornos de un mismo cliente comparten cuenta y bucket, y se separan por la `key`. Clientes distintos tienen cuentas y buckets distintos. Así, un cambio en un cliente no puede leer ni modificar el state de otro: las credenciales de una cuenta no alcanzan el bucket de la otra.
+Los entornos de un mismo producto comparten cuenta y bucket, y se separan por la `key`. Varios productos de una misma empresa pueden compartir cuenta y bucket: el producto en la `key` los separa. Clientes distintos tienen cuentas y buckets distintos. Así, un cambio en un cliente no puede leer ni modificar el state de otro: las credenciales de una cuenta no alcanzan el bucket de la otra.
 
 ## Cómo se conecta un stack al state
 
@@ -37,7 +37,7 @@ El backend se declara sin valores fijos y se completa al inicializar:
 ```
 terraform -chdir=stacks/web-app init \
   -backend-config="bucket=<bucket>" \
-  -backend-config="key=<client>/<environment>/terraform.tfstate" \
+  -backend-config="key=<product>/<environment>/terraform.tfstate" \
   -backend-config="region=<region>" \
   -backend-config="profile=<aws_profile>"
 ```
