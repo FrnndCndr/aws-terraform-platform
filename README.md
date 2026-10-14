@@ -52,18 +52,36 @@ aws-terraform-platform/
 │       ├── outputs.tf
 │       ├── providers.tf
 │       └── backend.tf
+├── profiles/
+│   ├── minimal.tfvars
+│   └── production.tfvars
 ├── clientes/
-│   ├── ejemplo/
-│   │   ├── dev.tfvars
-│   │   └── prod.tfvars
-│   └── .gitkeep
+│   └── ejemplo/
+│       ├── naming.tfvars
+│       ├── backend.hcl
+│       ├── dev.tfvars
+│       └── prod.tfvars
+├── scripts/
+│   └── tf.ps1
 └── docs/
-    └── modules/
+    ├── architecture/
+    ├── modules/
+    └── stacks/
 ```
 
 - **`bootstrap/`:** crea el bucket de state remoto de cada cuenta. Se aplica una vez.
 - **`modules/`:** módulos reutilizables, uno por responsabilidad.
 - **`stacks/web-app/`:** compone los módulos en una arquitectura completa.
-- **`stacks/dns-zone/`:** zona DNS del dominio propio, compartida por los entornos de un cliente.
-- **`clientes/`:** un archivo de variables por cliente y entorno. Solo `ejemplo/` se versiona.
-- **`docs/modules/`:** documentación de cada módulo.
+- **`stacks/dns-zone/`:** zona DNS del dominio propio, compartida por los entornos de un producto.
+- **`profiles/`:** tamaños reutilizables: `minimal` para pruebas, `production` para producción.
+- **`clientes/`:** una carpeta por producto, con sus nombres, su backend y un archivo por entorno. Solo `ejemplo/` se versiona.
+- **`scripts/tf.ps1`:** inicializa y ejecuta Terraform con los archivos de un producto, un entorno y un perfil.
+- **`docs/`:** arquitectura, módulos y stacks.
+
+## Uso
+
+```
+.\scripts\tf.ps1 -Product ejemplo -Environment dev -Profile minimal -Command plan
+```
+
+Ver `docs/architecture/environments.md`.
