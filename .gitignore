@@ -10,3 +10,8 @@ plans/
 .vscode/
 .claude/
 CLAUDE.md
+smoke-test/
+*accessKeys*.csv
+*credentials*.csv
+/*.json
+context/
