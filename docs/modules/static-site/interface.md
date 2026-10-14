@@ -4,7 +4,8 @@
 
 | Nombre | Tipo | Obligatoria | Valor por defecto | Descripción |
 |---|---|---|---|---|
-| `name_prefix` | `string` | Sí | — | Prefijo de los nombres de los recursos, con la forma `<client>-<environment>`. |
+| `product` | `string` | Sí | — | Producto SaaS. Forma parte de cada nombre. Ver `docs/architecture/naming.md`. |
+| `environment` | `string` | Sí | — | Entorno: `dev` o `prod`. Forma parte de cada nombre. |
 | `force_destroy` | `bool` | No | `false` | Permite destruir el bucket aunque tenga archivos. |
 | `price_class` | `string` | No | `PriceClass_100` | Conjunto de ubicaciones de CloudFront. `PriceClass_100` usa Norteamérica y Europa. |
 | `domain_names` | `list(string)` | No | `[]` | Dominios propios de la distribución. Vacío usa el dominio de CloudFront. |
@@ -27,7 +28,7 @@
 
 ## Nombre del bucket
 
-`<name_prefix>-site-<account_id>`. El id de cuenta se obtiene de la sesión activa.
+`s3-<product>-static-site-<environment>-<account_id>`. El id de cuenta se obtiene de la sesión activa.
 
 ## Uso
 
@@ -37,7 +38,8 @@ Sitio solo, con el dominio de CloudFront:
 module "static_site" {
   source = "../../modules/static-site"
 
-  name_prefix   = "ejemplo-dev"
+  product       = "ejemplo"
+  environment   = "dev"
   force_destroy = true
 }
 ```
@@ -48,7 +50,8 @@ Sitio y API en el mismo dominio:
 module "static_site" {
   source = "../../modules/static-site"
 
-  name_prefix            = "ejemplo-dev"
+  product                = "ejemplo"
+  environment            = "dev"
   api_origin_domain_name = module.api_gateway.endpoint_domain_name
 }
 ```
