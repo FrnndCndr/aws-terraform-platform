@@ -36,6 +36,7 @@ region = "us-east-1"
 | Etiquetas de imagen | Reutilizables | Inmutables |
 | ECS Exec | Activo | Inactivo |
 | Retención de logs | 7 días | 30 días |
+| Recuperación de secretos borrados | Inmediata (0 días) | 30 días |
 | Costo aproximado | ~29 USD al mes | ~85 USD al mes |
 
 `minimal` sirve para probar: se destruye y se recrea sin trabas. `production` protege los datos y tolera la falla de una zona.
