@@ -4,13 +4,13 @@
 
 Cada módulo crea los recursos de una responsabilidad y no conoce a los demás. El stack los conecta: pasa las salidas de uno como variables de otro (por ejemplo, las subnets de `network` al balanceador). Así un módulo se puede reutilizar en otro stack sin modificarlo.
 
-## Un prefijo de nombres común
+## Nombres uniformes
 
-El stack calcula `<client>-<environment>` y lo entrega a todos los módulos como `name_prefix`. Los nombres quedan uniformes y dos entornos del mismo cliente no chocan en la misma cuenta.
+El stack entrega `product` y `environment` a todos los módulos, y cada módulo arma sus nombres con el patrón `<servicio>-<product>-<propósito>-<environment>`. Los nombres quedan uniformes, y dos entornos o dos productos no chocan en la misma cuenta. El patrón completo está en `docs/architecture/naming.md`.
 
 ## Los tags se aplican en el provider
 
-`default_tags` del provider agrega `client`, `environment`, `project` y `managed_by` a todos los recursos que los admiten. Ningún módulo repite esos tags, y un recurso nuevo los recibe sin que nadie tenga que recordarlo. Sirven para filtrar costos por cliente y entorno en la facturación de AWS.
+`default_tags` del provider agrega `product`, `client`, `environment`, `project` y `managed_by` a todos los recursos que los admiten. Ningún módulo repite esos tags, y un recurso nuevo los recibe sin que nadie tenga que recordarlo. Sirven para filtrar costos por cliente y entorno en la facturación de AWS.
 
 ## El backend se configura al inicializar
 
