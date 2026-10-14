@@ -6,7 +6,8 @@
 
 | Nombre | Tipo | Obligatoria | Valor por defecto | Descripción |
 |---|---|---|---|---|
-| `client` | `string` | Sí | — | Identificador del cliente. Solo minúsculas, números y guiones. |
+| `product` | `string` | Sí | — | Producto SaaS. Forma parte de cada nombre. Solo minúsculas, números y guiones. |
+| `client` | `string` | Sí | — | Empresa dueña del producto. Va como tag. Solo minúsculas, números y guiones. |
 | `environment` | `string` | Sí | — | Entorno: `dev` o `prod`. |
 | `aws_profile` | `string` | Sí | — | Perfil de la AWS CLI con el que Terraform se conecta a la cuenta del cliente. |
 | `region` | `string` | No | `us-east-1` | Región de los recursos. |
@@ -36,6 +37,7 @@
 
 | Nombre | Tipo | Obligatoria | Valor por defecto | Descripción |
 |---|---|---|---|---|
+| `backend_service_name` | `string` | No | `backend` | Propósito del servicio del backend en los nombres, y nombre de su contenedor. |
 | `backend_image` | `string` | No | `null` | Imagen completa del backend. `null` usa el repositorio ECR del entorno con `backend_image_tag`. |
 | `backend_image_tag` | `string` | No | `latest` | Etiqueta de la imagen en el repositorio ECR. |
 | `backend_container_port` | `number` | No | `8080` | Puerto en el que escucha el backend. |
@@ -106,29 +108,30 @@
 | `db_secret_arn` | Secreto con el usuario y la contraseña de la base. |
 | `uploads_bucket_name` | Bucket de archivos subidos. |
 
-## Archivo de variables
+## Archivos de variables
 
-Un archivo por cliente y entorno, en `clientes/<client>/<environment>.tfvars`. El de ejemplo, para un entorno de prueba que se destruye y recrea seguido:
+Cada despliegue combina un perfil, el naming del producto y el archivo del entorno. Ver `docs/architecture/environments.md`.
+
+`clientes/<product>/naming.tfvars`:
 
 ```hcl
-client      = "ejemplo"
+product = "ejemplo"
+client  = "ejemplo-corp"
+
+backend_service_name = "api"
+db_name              = "app"
+```
+
+`clientes/<product>/dev.tfvars`:
+
+```hcl
 environment = "dev"
 aws_profile = "ejemplo-dev"
 
 vpc_cidr = "10.20.0.0/16"
 
-site_force_destroy = true
-
-backend_image                  = "public.ecr.aws/nginx/nginx:stable"
-backend_container_port         = 80
-backend_enable_execute_command = true
-ecr_force_delete               = true
-
-db_deletion_protection = false
-db_skip_final_snapshot = true
-db_apply_immediately   = true
-
-uploads_force_destroy = true
+backend_image          = "public.ecr.aws/nginx/nginx:stable"
+backend_container_port = 80
 ```
 
 `backend_image` apunta a una imagen pública de `nginx` mientras no exista la imagen propia en ECR. Con dominio propio se agregan:
@@ -138,16 +141,16 @@ dns_zone_name    = "ejemplo.cl"
 site_domain_name = "dev.ejemplo.cl"
 ```
 
-Solo `clientes/ejemplo/` se versiona. Los archivos de clientes reales quedan fuera del repositorio.
+Solo `clientes/ejemplo/` se versiona. Los archivos de productos reales quedan fuera del repositorio.
 
 ## Uso
 
-Inicializar el backend, una vez por cliente y entorno:
+Inicializar el backend, una vez por producto y entorno:
 
 ```
 terraform -chdir=stacks/web-app init \
   -backend-config="bucket=<bucket del state>" \
-  -backend-config="key=<client>/<environment>/terraform.tfstate" \
+  -backend-config="key=<product>/<environment>/terraform.tfstate" \
   -backend-config="region=<region>" \
   -backend-config="profile=<aws_profile>"
 ```
@@ -155,8 +158,10 @@ terraform -chdir=stacks/web-app init \
 Planificar y aplicar:
 
 ```
-terraform -chdir=stacks/web-app plan  -var-file=../../clientes/<client>/<environment>.tfvars
-terraform -chdir=stacks/web-app apply -var-file=../../clientes/<client>/<environment>.tfvars
+terraform -chdir=stacks/web-app plan \
+  -var-file=../../profiles/<perfil>.tfvars \
+  -var-file=../../clientes/<product>/naming.tfvars \
+  -var-file=../../clientes/<product>/<environment>.tfvars
 ```
 
-Para cambiar de cliente o entorno en el mismo directorio de trabajo, se repite `init` con la nueva configuración y la opción `-reconfigure`.
+`apply` usa los mismos tres archivos. Para cambiar de producto o entorno en el mismo directorio de trabajo, se repite `init` con la nueva configuración y la opción `-reconfigure`.
