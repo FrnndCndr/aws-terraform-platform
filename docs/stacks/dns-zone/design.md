@@ -16,4 +16,4 @@ Este stack solo crea la zona. Cada entorno crea sus propios registros (el subdom
 
 ## Sin tag de entorno
 
-La zona lleva los tags `client`, `project` y `managed_by`, sin `environment`, porque es compartida.
+La zona lleva los tags `product`, `client`, `project` y `managed_by`, sin `environment`, porque es compartida.
