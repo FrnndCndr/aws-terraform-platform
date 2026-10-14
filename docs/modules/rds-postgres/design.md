@@ -30,7 +30,7 @@ Se indica solo la versión mayor (`17`). AWS aplica las versiones menores, que t
 
 `deletion_protection` y el respaldo final están activos por defecto: un `destroy` accidental no borra datos. En un entorno de prueba que se destruye y recrea seguido, se desactivan desde su archivo de variables.
 
-El respaldo final se llama `<name_prefix>-postgres-final`. Si ya existe uno con ese nombre, de un `destroy` anterior, hay que borrarlo antes del siguiente.
+El respaldo final se llama `rds-<product>-postgres-<environment>-final`. Si ya existe uno con ese nombre, de un `destroy` anterior, hay que borrarlo antes del siguiente.
 
 ## Una sola zona por defecto
 
