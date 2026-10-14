@@ -1,6 +1,16 @@
+variable "product" {
+  type        = string
+  description = "Product that owns the domain. Lowercase letters, numbers and hyphens only."
+
+  validation {
+    condition     = can(regex("^[a-z0-9-]+$", var.product))
+    error_message = "product must contain only lowercase letters, numbers and hyphens."
+  }
+}
+
 variable "client" {
   type        = string
-  description = "Client identifier. Lowercase letters, numbers and hyphens only."
+  description = "Company that owns the product. Used as a tag. Lowercase letters, numbers and hyphens only."
 
   validation {
     condition     = can(regex("^[a-z0-9-]+$", var.client))
