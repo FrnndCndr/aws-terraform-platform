@@ -4,7 +4,8 @@
 
 | Nombre | Tipo | Obligatoria | Valor por defecto | Descripción |
 |---|---|---|---|---|
-| `name_prefix` | `string` | Sí | — | Prefijo de los nombres, con la forma `<client>-<environment>`. |
+| `product` | `string` | Sí | — | Producto SaaS. Forma parte de cada nombre. Ver `docs/architecture/naming.md`. |
+| `environment` | `string` | Sí | — | Entorno: `dev` o `prod`. Forma parte de cada nombre. |
 | `service_name` | `string` | No | `backend` | Nombre del servicio y de su contenedor. |
 | `vpc_id` | `string` | Sí | — | VPC donde corren las tareas. |
 | `subnet_ids` | `list(string)` | Sí | — | Subnets donde corren las tareas. |
@@ -15,7 +16,7 @@
 | `memory` | `number` | No | `512` | Memoria de la tarea, en MB. |
 | `cpu_architecture` | `string` | No | `X86_64` | `X86_64` o `ARM64`. Debe coincidir con la arquitectura de la imagen. |
 | `desired_count` | `number` | No | `1` | Cantidad de tareas. `0` detiene el servicio sin destruirlo. |
-| `environment` | `map(string)` | No | `{}` | Variables de entorno del contenedor. |
+| `container_environment` | `map(string)` | No | `{}` | Variables de entorno del contenedor. |
 | `secrets` | `map(object)` | No | `{}` | Variables de entorno que salen de Secrets Manager. Clave: nombre de la variable. Valor: `{ secret_arn, json_key }`; `json_key` es opcional y elige un campo de un secreto JSON. |
 | `task_role_policies` | `map(string)` | No | `{}` | Políticas de IAM (JSON) que se agregan al rol del contenedor. Clave: nombre de la política. |
 | `ingress_security_group_ids` | `map(string)` | No | `{}` | Security groups que pueden llegar al puerto del contenedor. Clave: etiqueta descriptiva. |
