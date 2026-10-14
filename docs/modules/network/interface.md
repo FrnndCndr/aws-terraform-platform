@@ -4,7 +4,8 @@
 
 | Nombre | Tipo | Obligatoria | Valor por defecto | Descripción |
 |---|---|---|---|---|
-| `name_prefix` | `string` | Sí | — | Prefijo de los nombres de los recursos, con la forma `<client>-<environment>`. |
+| `product` | `string` | Sí | — | Producto SaaS. Forma parte de cada nombre. Ver `docs/architecture/naming.md`. |
+| `environment` | `string` | Sí | — | Entorno: `dev` o `prod`. Forma parte de cada nombre. |
 | `vpc_cidr` | `string` | Sí | — | Rango de direcciones de la VPC, en notación CIDR con máscara `/16`. |
 | `az_count` | `number` | No | `2` | Cantidad de zonas de disponibilidad. Entre 2 y 3. |
 | `excluded_zone_ids` | `list(string)` | No | `[]` | Zonas de disponibilidad (por id, por ejemplo `use1-az3`) que no se usan. |
@@ -36,7 +37,8 @@ Las subnets se calculan a partir de `vpc_cidr`, cada una con máscara `/20` (4.0
 module "network" {
   source = "../../modules/network"
 
-  name_prefix = "ejemplo-dev"
+  product     = "ejemplo"
+  environment = "dev"
   vpc_cidr    = "10.20.0.0/16"
 }
 ```
