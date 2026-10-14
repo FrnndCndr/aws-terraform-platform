@@ -168,6 +168,31 @@ variable "backend_environment" {
   default     = {}
 }
 
+variable "backend_env_names" {
+  type = object({
+    db_host        = optional(string, "DB_HOST")
+    db_port        = optional(string, "DB_PORT")
+    db_name        = optional(string, "DB_NAME")
+    db_username    = optional(string, "DB_USERNAME")
+    db_password    = optional(string, "DB_PASSWORD")
+    uploads_bucket = optional(string, "UPLOADS_BUCKET")
+  })
+  description = "Names of the environment variables that carry the database and uploads bucket data to the backend."
+  default     = {}
+}
+
+variable "backend_secrets" {
+  type        = list(string)
+  description = "Environment variables of the backend read from an empty secret created in Secrets Manager, for example JWT_KEY."
+  default     = []
+}
+
+variable "secrets_recovery_window_days" {
+  type        = number
+  description = "Days AWS keeps a deleted application secret. 0 removes it immediately."
+  default     = 7
+}
+
 variable "backend_health_check" {
   type = object({
     command              = list(string)
