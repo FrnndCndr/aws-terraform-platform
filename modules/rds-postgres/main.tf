@@ -1,19 +1,22 @@
 locals {
-  identifier = "${var.name_prefix}-postgres"
+  identifier          = "rds-${var.product}-postgres-${var.environment}"
+  subnet_group_name   = "dbsubnet-${var.product}-postgres-${var.environment}"
+  security_group_name = "secgroup-${var.product}-postgres-${var.environment}"
+  final_snapshot_name = "rds-${var.product}-postgres-${var.environment}-final"
 }
 
 resource "aws_db_subnet_group" "this" {
-  name       = local.identifier
+  name       = local.subnet_group_name
   subnet_ids = var.subnet_ids
 }
 
 resource "aws_security_group" "database" {
-  name        = local.identifier
+  name        = local.security_group_name
   description = "PostgreSQL database"
   vpc_id      = var.vpc_id
 
   tags = {
-    Name = local.identifier
+    Name = local.security_group_name
   }
 }
 
@@ -52,7 +55,7 @@ resource "aws_db_instance" "this" {
   copy_tags_to_snapshot      = true
   deletion_protection        = var.deletion_protection
   skip_final_snapshot        = var.skip_final_snapshot
-  final_snapshot_identifier  = var.skip_final_snapshot ? null : "${local.identifier}-final"
+  final_snapshot_identifier  = var.skip_final_snapshot ? null : local.final_snapshot_name
   auto_minor_version_upgrade = true
   apply_immediately          = var.apply_immediately
 }
