@@ -93,6 +93,15 @@ module "rds_postgres" {
   }
 }
 
+module "app_secrets" {
+  source = "../../modules/app-secrets"
+
+  product              = var.product
+  environment          = var.environment
+  secret_names         = var.backend_secrets
+  recovery_window_days = var.secrets_recovery_window_days
+}
+
 module "ecs_service" {
   source = "../../modules/ecs-service"
 
@@ -113,22 +122,25 @@ module "ecs_service" {
   log_retention_days     = var.log_retention_days
 
   container_environment = merge(var.backend_environment, {
-    DB_HOST        = module.rds_postgres.address
-    DB_PORT        = tostring(module.rds_postgres.port)
-    DB_NAME        = module.rds_postgres.db_name
-    UPLOADS_BUCKET = module.uploads_bucket.bucket_name
+    (var.backend_env_names.db_host)        = module.rds_postgres.address
+    (var.backend_env_names.db_port)        = tostring(module.rds_postgres.port)
+    (var.backend_env_names.db_name)        = module.rds_postgres.db_name
+    (var.backend_env_names.uploads_bucket) = module.uploads_bucket.bucket_name
   })
 
-  secrets = {
-    DB_USERNAME = {
-      secret_arn = module.rds_postgres.master_user_secret_arn
-      json_key   = "username"
-    }
-    DB_PASSWORD = {
-      secret_arn = module.rds_postgres.master_user_secret_arn
-      json_key   = "password"
-    }
-  }
+  secrets = merge(
+    {
+      (var.backend_env_names.db_username) = {
+        secret_arn = module.rds_postgres.master_user_secret_arn
+        json_key   = "username"
+      }
+      (var.backend_env_names.db_password) = {
+        secret_arn = module.rds_postgres.master_user_secret_arn
+        json_key   = "password"
+      }
+    },
+    { for name, arn in module.app_secrets.secret_arns : name => { secret_arn = arn } }
+  )
 
   task_role_policies = {
     uploads-bucket = module.uploads_bucket.read_write_policy_json
