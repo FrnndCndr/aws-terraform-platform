@@ -18,3 +18,4 @@ smoke-test/
 context/
 clientes/*/backend.hcl
 !clientes/ejemplo/backend.hcl
+clientes/*/deploy.json
