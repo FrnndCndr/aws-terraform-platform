@@ -19,7 +19,7 @@ resource "aws_vpc" "this" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = "${var.name_prefix}-vpc"
+    Name = "vpc-${var.product}-${var.environment}"
   }
 }
 
@@ -27,7 +27,7 @@ resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
 
   tags = {
-    Name = "${var.name_prefix}-igw"
+    Name = "igw-${var.product}-${var.environment}"
   }
 }
 
@@ -40,7 +40,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = false
 
   tags = {
-    Name = "${var.name_prefix}-public-${local.availability_zones[count.index]}"
+    Name = "subnet-${var.product}-public-${local.availability_zones[count.index]}-${var.environment}"
   }
 }
 
@@ -52,7 +52,7 @@ resource "aws_subnet" "private" {
   availability_zone = local.availability_zones[count.index]
 
   tags = {
-    Name = "${var.name_prefix}-private-${local.availability_zones[count.index]}"
+    Name = "subnet-${var.product}-private-${local.availability_zones[count.index]}-${var.environment}"
   }
 }
 
@@ -65,7 +65,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "${var.name_prefix}-public-rt"
+    Name = "rt-${var.product}-public-${var.environment}"
   }
 }
 
@@ -82,7 +82,7 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.this.id
 
   tags = {
-    Name = "${var.name_prefix}-private-rt-${local.availability_zones[count.index]}"
+    Name = "rt-${var.product}-private-${local.availability_zones[count.index]}-${var.environment}"
   }
 }
 
@@ -99,7 +99,7 @@ resource "aws_eip" "nat" {
   domain = "vpc"
 
   tags = {
-    Name = "${var.name_prefix}-nat-${local.availability_zones[count.index]}"
+    Name = "eip-${var.product}-nat-${local.availability_zones[count.index]}-${var.environment}"
   }
 
   depends_on = [aws_internet_gateway.this]
@@ -112,7 +112,7 @@ resource "aws_nat_gateway" "this" {
   subnet_id     = aws_subnet.public[count.index].id
 
   tags = {
-    Name = "${var.name_prefix}-nat-${local.availability_zones[count.index]}"
+    Name = "nat-${var.product}-${local.availability_zones[count.index]}-${var.environment}"
   }
 
   depends_on = [aws_internet_gateway.this]
