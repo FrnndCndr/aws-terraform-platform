@@ -19,7 +19,7 @@ locals {
 }
 
 resource "aws_s3_bucket" "site" {
-  bucket        = "${var.name_prefix}-site-${data.aws_caller_identity.current.account_id}"
+  bucket        = "s3-${var.product}-static-site-${var.environment}-${data.aws_caller_identity.current.account_id}"
   force_destroy = var.force_destroy
 }
 
@@ -51,14 +51,14 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "site" {
 }
 
 resource "aws_cloudfront_origin_access_control" "site" {
-  name                              = "${var.name_prefix}-site"
+  name                              = "oac-${var.product}-static-site-${var.environment}"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
 
 resource "aws_cloudfront_function" "rewrite_index" {
-  name    = "${var.name_prefix}-rewrite-index"
+  name    = "cff-${var.product}-rewrite-index-${var.environment}"
   runtime = "cloudfront-js-2.0"
   publish = true
   code    = file("${path.module}/functions/rewrite-index.js")
