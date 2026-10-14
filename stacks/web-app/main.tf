@@ -1,5 +1,4 @@
 locals {
-  name_prefix        = "${var.client}-${var.environment}"
   custom_domain      = var.site_domain_name != null
   backend_subnet_ids = var.enable_nat_gateway ? module.network.private_subnet_ids : module.network.public_subnet_ids
   backend_image      = coalesce(var.backend_image, "${module.ecr.repository_url}:${var.backend_image_tag}")
@@ -13,7 +12,8 @@ locals {
 module "network" {
   source = "../../modules/network"
 
-  name_prefix        = local.name_prefix
+  product            = var.product
+  environment        = var.environment
   vpc_cidr           = var.vpc_cidr
   az_count           = var.az_count
   excluded_zone_ids  = var.excluded_zone_ids
@@ -39,7 +39,8 @@ module "site_certificate" {
 module "static_site" {
   source = "../../modules/static-site"
 
-  name_prefix            = local.name_prefix
+  product                = var.product
+  environment            = var.environment
   force_destroy          = var.site_force_destroy
   price_class            = var.site_price_class
   domain_names           = local.custom_domain ? [var.site_domain_name] : []
@@ -51,7 +52,9 @@ module "static_site" {
 module "ecr" {
   source = "../../modules/ecr"
 
-  name_prefix          = local.name_prefix
+  product              = var.product
+  environment          = var.environment
+  service_name         = var.backend_service_name
   image_tag_mutability = var.ecr_image_tag_mutability
   force_delete         = var.ecr_force_delete
 }
@@ -59,7 +62,8 @@ module "ecr" {
 module "uploads_bucket" {
   source = "../../modules/uploads-bucket"
 
-  name_prefix          = local.name_prefix
+  product              = var.product
+  environment          = var.environment
   cors_allowed_origins = local.site_origins
   versioning_enabled   = var.uploads_versioning
   force_destroy        = var.uploads_force_destroy
@@ -68,7 +72,8 @@ module "uploads_bucket" {
 module "rds_postgres" {
   source = "../../modules/rds-postgres"
 
-  name_prefix                   = local.name_prefix
+  product                       = var.product
+  environment                   = var.environment
   vpc_id                        = module.network.vpc_id
   subnet_ids                    = module.network.private_subnet_ids
   engine_version                = var.db_engine_version
@@ -91,7 +96,9 @@ module "rds_postgres" {
 module "ecs_service" {
   source = "../../modules/ecs-service"
 
-  name_prefix            = local.name_prefix
+  product                = var.product
+  environment            = var.environment
+  service_name           = var.backend_service_name
   vpc_id                 = module.network.vpc_id
   subnet_ids             = local.backend_subnet_ids
   assign_public_ip       = !var.enable_nat_gateway
@@ -105,7 +112,7 @@ module "ecs_service" {
   enable_execute_command = var.backend_enable_execute_command
   log_retention_days     = var.log_retention_days
 
-  environment = merge(var.backend_environment, {
+  container_environment = merge(var.backend_environment, {
     DB_HOST        = module.rds_postgres.address
     DB_PORT        = tostring(module.rds_postgres.port)
     DB_NAME        = module.rds_postgres.db_name
@@ -135,7 +142,8 @@ module "ecs_service" {
 module "api_gateway" {
   source = "../../modules/api-gateway"
 
-  name_prefix                   = local.name_prefix
+  product                       = var.product
+  environment                   = var.environment
   vpc_id                        = module.network.vpc_id
   vpc_cidr                      = module.network.vpc_cidr
   subnet_ids                    = module.network.private_subnet_ids
