@@ -1,6 +1,16 @@
-variable "name_prefix" {
+variable "product" {
   type        = string
-  description = "Prefix of the resource names, in the form <client>-<environment>."
+  description = "SaaS product. Part of every resource name."
+
+  validation {
+    condition     = can(regex("^[a-z0-9-]+$", var.product))
+    error_message = "product must contain only lowercase letters, numbers and hyphens."
+  }
+}
+
+variable "environment" {
+  type        = string
+  description = "Environment, dev or prod. Part of every resource name."
 }
 
 variable "service_name" {
@@ -70,7 +80,7 @@ variable "desired_count" {
   }
 }
 
-variable "environment" {
+variable "container_environment" {
   type        = map(string)
   description = "Environment variables of the container."
   default     = {}
