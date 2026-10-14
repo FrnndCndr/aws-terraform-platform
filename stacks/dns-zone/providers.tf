@@ -15,6 +15,7 @@ provider "aws" {
 
   default_tags {
     tags = {
+      product    = var.product
       client     = var.client
       project    = var.project
       managed_by = "terraform"
