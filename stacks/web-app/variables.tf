@@ -1,6 +1,16 @@
+variable "product" {
+  type        = string
+  description = "SaaS product. Prefix of every resource name. Lowercase letters, numbers and hyphens only."
+
+  validation {
+    condition     = can(regex("^[a-z0-9-]+$", var.product))
+    error_message = "product must contain only lowercase letters, numbers and hyphens."
+  }
+}
+
 variable "client" {
   type        = string
-  description = "Client identifier. Lowercase letters, numbers and hyphens only."
+  description = "Company that owns the product. Used as a tag. Lowercase letters, numbers and hyphens only."
 
   validation {
     condition     = can(regex("^[a-z0-9-]+$", var.client))
@@ -96,6 +106,17 @@ variable "site_domain_name" {
   validation {
     condition     = var.site_domain_name == null || (var.dns_zone_name != null && var.region == "us-east-1")
     error_message = "site_domain_name requires dns_zone_name and region us-east-1, because CloudFront only accepts certificates from us-east-1."
+  }
+}
+
+variable "backend_service_name" {
+  type        = string
+  description = "Name of the backend service, its container and its image repository."
+  default     = "backend"
+
+  validation {
+    condition     = can(regex("^[a-z0-9-]+$", var.backend_service_name))
+    error_message = "backend_service_name must contain only lowercase letters, numbers and hyphens."
   }
 }
 
