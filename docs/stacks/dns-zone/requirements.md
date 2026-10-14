@@ -2,14 +2,14 @@
 
 ## Propósito
 
-Crear la zona de Route 53 del dominio propio de un cliente. La zona es compartida por todos sus entornos.
+Crear la zona de Route 53 del dominio propio de un producto. La zona es compartida por todos sus entornos.
 
 ## Qué debe cumplir
 
 1. Crea una zona hospedada pública para el dominio.
 2. Entrega como salida los cuatro servidores de nombres de la zona, que se cargan en el registrador del dominio.
 3. La zona no se puede destruir por accidente con `terraform destroy`.
-4. Guarda su state en el bucket de la cuenta, en una ruta propia del cliente.
+4. Guarda su state en el bucket de la cuenta, en una ruta propia del producto.
 
 ## Paso manual
 
