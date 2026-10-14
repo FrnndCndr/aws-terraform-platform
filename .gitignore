@@ -2,6 +2,7 @@
 *.tfstate*
 *.tfvars
 !clientes/ejemplo/*.tfvars
+!profiles/*.tfvars
 .env
 crash.log
 override.tf
@@ -15,3 +16,5 @@ smoke-test/
 *credentials*.csv
 /*.json
 context/
+clientes/*/backend.hcl
+!clientes/ejemplo/backend.hcl
