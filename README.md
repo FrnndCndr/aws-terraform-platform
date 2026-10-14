@@ -37,14 +37,15 @@ aws-terraform-platform/
 │   └── outputs.tf
 ├── modules/
 │   ├── network/
-│   ├── rds-postgres/
-│   ├── ecs-service/
-│   ├── alb/
 │   ├── static-site/
-│   ├── acm-certificate/
-│   ├── github-oidc/
-│   └── ecr/
+│   ├── ecr/
+│   ├── ecs-service/
+│   ├── api-gateway/
+│   ├── rds-postgres/
+│   ├── uploads-bucket/
+│   └── acm-certificate/
 ├── stacks/
+│   ├── dns-zone/
 │   └── web-app/
 │       ├── main.tf
 │       ├── variables.tf
@@ -63,5 +64,6 @@ aws-terraform-platform/
 - **`bootstrap/`:** crea el bucket de state remoto de cada cuenta. Se aplica una vez.
 - **`modules/`:** módulos reutilizables, uno por responsabilidad.
 - **`stacks/web-app/`:** compone los módulos en una arquitectura completa.
+- **`stacks/dns-zone/`:** zona DNS del dominio propio, compartida por los entornos de un cliente.
 - **`clientes/`:** un archivo de variables por cliente y entorno. Solo `ejemplo/` se versiona.
 - **`docs/modules/`:** documentación de cada módulo.
