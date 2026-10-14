@@ -4,7 +4,8 @@
 
 | Nombre | Tipo | Obligatoria | Valor por defecto | Descripción |
 |---|---|---|---|---|
-| `name_prefix` | `string` | Sí | — | Prefijo de los nombres, con la forma `<client>-<environment>`. |
+| `product` | `string` | Sí | — | Producto SaaS. Forma parte de cada nombre. Ver `docs/architecture/naming.md`. |
+| `environment` | `string` | Sí | — | Entorno: `dev` o `prod`. Forma parte de cada nombre. |
 | `vpc_id` | `string` | Sí | — | VPC donde corre el backend. |
 | `vpc_cidr` | `string` | Sí | — | Rango de la VPC. El VPC Link solo puede enviar tráfico dentro de él. |
 | `subnet_ids` | `list(string)` | Sí | — | Subnets donde se crean las interfaces del VPC Link. |
