@@ -58,6 +58,7 @@ Con `product = "ejemplo"`, `environment = "dev"` y `backend_service_name = "api"
 | Grupo de subnets y security group de la base | `dbsubnet-ejemplo-postgres-dev`, `secgroup-ejemplo-postgres-dev` | `rds-postgres` |
 | Respaldo final de la base | `rds-ejemplo-postgres-dev-final` | `rds-postgres` |
 | Bucket de archivos subidos | `s3-ejemplo-upload-files-dev-<account_id>` | `uploads-bucket` |
+| Secretos de la aplicación | `secret-ejemplo-<nombre>-dev`, por ejemplo `secret-ejemplo-jwt-key-dev` | `app-secrets` |
 
 ## Excepciones
 
