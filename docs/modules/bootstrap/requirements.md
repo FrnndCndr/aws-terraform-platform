@@ -20,11 +20,12 @@ Un stack guarda su state en un bucket, pero ese bucket también hay que crearlo.
 6. El bucket no se puede destruir por accidente con `terraform destroy`.
 7. Las versiones antiguas del state se eliminan pasado un plazo configurable.
 8. Entrega como salida el nombre del bucket, su ARN y su región.
+9. De forma opcional, crea el proveedor OIDC de GitHub de la cuenta, que usan los roles de despliegue de todos los entornos.
 
 ## Qué no hace
 
 - No crea tabla DynamoDB: el bloqueo usa el mecanismo nativo de S3.
-- No crea usuarios, roles ni permisos.
+- No crea usuarios, roles ni permisos. Los roles de despliegue los crea cada entorno con `github-oidc`.
 - No crea recursos de red, base de datos ni cómputo.
 
 ## Costo
