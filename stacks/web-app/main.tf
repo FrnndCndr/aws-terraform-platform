@@ -151,6 +151,34 @@ module "ecs_service" {
   }
 }
 
+data "aws_iam_openid_connect_provider" "github" {
+  count = var.github_owner == null ? 0 : 1
+
+  url = "https://token.actions.githubusercontent.com"
+}
+
+module "github_oidc" {
+  source = "../../modules/github-oidc"
+  count  = var.github_owner == null ? 0 : 1
+
+  product                = var.product
+  environment            = var.environment
+  oidc_provider_arn      = data.aws_iam_openid_connect_provider.github[0].arn
+  github_owner           = var.github_owner
+  github_owner_id        = var.github_owner_id
+  github_environment     = coalesce(var.github_environment, var.environment)
+  backend_repository     = var.github_backend_repository
+  backend_repository_id  = var.github_backend_repository_id
+  backend_service_name   = var.backend_service_name
+  ecr_repository_arn     = module.ecr.repository_arn
+  ecs_service_arn        = module.ecs_service.service_arn
+  ecs_pass_role_arns     = [module.ecs_service.execution_role_arn, module.ecs_service.task_role_arn]
+  frontend_repository    = var.github_frontend_repository
+  frontend_repository_id = var.github_frontend_repository_id
+  site_bucket_arn        = module.static_site.bucket_arn
+  site_distribution_arn  = module.static_site.distribution_arn
+}
+
 module "api_gateway" {
   source = "../../modules/api-gateway"
 
