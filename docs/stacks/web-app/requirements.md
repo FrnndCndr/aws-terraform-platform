@@ -27,6 +27,7 @@ El stack es lo que se aplica. Los módulos no se aplican por separado.
 | Bucket de archivos | `uploads-bucket` | Incluido |
 | Secretos de la aplicación | `app-secrets` | Incluido |
 | Certificado del dominio propio | `acm-certificate` | Incluido, opcional |
+| Roles de despliegue desde GitHub Actions | `github-oidc` | Incluido, opcional |
 
 ## Costo
 
