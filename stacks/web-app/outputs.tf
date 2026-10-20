@@ -67,3 +67,23 @@ output "uploads_bucket_name" {
   description = "Bucket of the uploaded files."
   value       = module.uploads_bucket.bucket_name
 }
+
+output "ecs_task_definition_family" {
+  description = "Family of the backend task definition. The deployment takes its latest revision."
+  value       = module.ecs_service.task_definition_family
+}
+
+output "backend_container_name" {
+  description = "Backend container inside the task definition."
+  value       = module.ecs_service.container_name
+}
+
+output "github_backend_role_arn" {
+  description = "Role the backend workflow assumes. Null without deployment from GitHub."
+  value       = one(module.github_oidc[*].backend_role_arn)
+}
+
+output "github_frontend_role_arn" {
+  description = "Role the frontend workflow assumes. Null without deployment from GitHub."
+  value       = one(module.github_oidc[*].frontend_role_arn)
+}
