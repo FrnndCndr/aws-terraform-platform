@@ -1,0 +1,86 @@
+name: deploy-frontend
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "22"
+  INSTALL_COMMAND: pnpm install --frozen-lockfile
+  BUILD_COMMAND: pnpm build
+  OUT_DIR: out
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-frontend-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: eval "$INSTALL_COMMAND"
+
+      - name: Build
+        run: eval "$BUILD_COMMAND"
+
+      - name: Check the build output
+        run: |
+          if [ ! -f "$OUT_DIR/index.html" ]; then
+            echo "index.html not found in $OUT_DIR" >&2
+            exit 1
+          fi
+          for forbidden in localhost execute-api; do
+            found="$(grep -rlF --include='*.html' --include='*.js' "$forbidden" "$OUT_DIR" || true)"
+            if [ -n "$found" ]; then
+              echo "Found $forbidden in:" >&2
+              echo "$found" >&2
+              exit 1
+            fi
+          done
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Upload site
+        env:
+          SITE_BUCKET: ${{ vars.SITE_BUCKET }}
+        run: aws s3 sync "$OUT_DIR" "s3://$SITE_BUCKET" --delete
+
+      - name: Invalidate cache
+        env:
+          DISTRIBUTION_ID: ${{ vars.DISTRIBUTION_ID }}
+        run: |
+          invalidation_id="$(aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/*" --query Invalidation.Id --output text)"
+          aws cloudfront wait invalidation-completed --distribution-id "$DISTRIBUTION_ID" --id "$invalidation_id"
+
+      - name: Check site
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          for attempt in $(seq 1 30); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' "$SITE_URL" || true)"
+            echo "attempt $attempt: $status"
+            if [ "$status" = "200" ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1
