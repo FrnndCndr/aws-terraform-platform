@@ -312,3 +312,50 @@ variable "uploads_force_destroy" {
   description = "Allows destroying the uploads bucket even when it contains files."
   default     = false
 }
+
+variable "github_owner" {
+  type        = string
+  description = "GitHub organization or user that owns the repositories. Null does not create deploy roles."
+  default     = null
+}
+
+variable "github_owner_id" {
+  type        = string
+  description = "Numeric id of the GitHub owner. Set it when the repositories emit the immutable subject. Null uses the subject by name."
+  default     = null
+}
+
+variable "github_backend_repository" {
+  type        = string
+  description = "Backend repository, without the owner. Null does not create the backend role."
+  default     = null
+}
+
+variable "github_backend_repository_id" {
+  type        = string
+  description = "Numeric id of the backend repository. Required with github_owner_id and github_backend_repository."
+  default     = null
+}
+
+variable "github_frontend_repository_id" {
+  type        = string
+  description = "Numeric id of the frontend repository. Required with github_owner_id and github_frontend_repository."
+  default     = null
+}
+
+variable "github_frontend_repository" {
+  type        = string
+  description = "Frontend repository, without the owner. Null does not create the frontend role."
+  default     = null
+
+  validation {
+    condition     = var.github_owner == null || var.github_backend_repository != null || var.github_frontend_repository != null
+    error_message = "github_owner requires github_backend_repository, github_frontend_repository or both."
+  }
+}
+
+variable "github_environment" {
+  type        = string
+  description = "GitHub environment the deployments run from. Null uses the value of environment."
+  default     = null
+}
