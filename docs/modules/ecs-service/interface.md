@@ -10,7 +10,7 @@
 | `vpc_id` | `string` | Sí | — | VPC donde corren las tareas. |
 | `subnet_ids` | `list(string)` | Sí | — | Subnets donde corren las tareas. |
 | `assign_public_ip` | `bool` | No | `false` | Da IP pública a cada tarea. Necesario en subnets públicas sin NAT Gateway. |
-| `image` | `string` | Sí | — | Imagen del contenedor, con su etiqueta. |
+| `image` | `string` | Sí | — | Imagen inicial del contenedor, con su etiqueta. Las versiones siguientes las despliega el pipeline; cambiar este valor después de crear el servicio no lo despliega. |
 | `container_port` | `number` | No | `8080` | Puerto en el que escucha el contenedor. |
 | `cpu` | `number` | No | `256` | CPU de la tarea, en unidades (1024 = 1 vCPU). |
 | `memory` | `number` | No | `512` | Memoria de la tarea, en MB. |
@@ -30,6 +30,9 @@
 |---|---|
 | `cluster_name` | Nombre del cluster. |
 | `service_name` | Nombre del servicio ECS. |
+| `service_arn` | ARN del servicio ECS. Recurso del permiso de despliegue. |
+| `task_definition_family` | Familia de la definición de tarea. El despliegue toma su última revisión. |
+| `container_name` | Nombre del contenedor dentro de la definición de tarea. El despliegue cambia la imagen de este contenedor. |
 | `security_group_id` | Security group de las tareas. Otros módulos lo usan para aceptar su tráfico. |
 | `task_role_name` | Nombre del rol del contenedor. |
 | `task_role_arn` | ARN del rol del contenedor. |
