@@ -12,3 +12,8 @@ output "bucket_region" {
   description = "Region of the state bucket. Use as region when initializing a stack backend."
   value       = aws_s3_bucket.state.region
 }
+
+output "github_oidc_provider_arn" {
+  description = "ARN of the GitHub OIDC provider. Null when it was not created."
+  value       = one(aws_iam_openid_connect_provider.github[*].arn)
+}
