@@ -59,6 +59,7 @@ Con `product = "ejemplo"`, `environment = "dev"` y `backend_service_name = "api"
 | Respaldo final de la base | `rds-ejemplo-postgres-dev-final` | `rds-postgres` |
 | Bucket de archivos subidos | `s3-ejemplo-upload-files-dev-<account_id>` | `uploads-bucket` |
 | Secretos de la aplicación | `secret-ejemplo-<nombre>-dev`, por ejemplo `secret-ejemplo-jwt-key-dev` | `app-secrets` |
+| Roles de despliegue desde GitHub | `iam-ejemplo-api-deploy-dev`, `iam-ejemplo-static-site-deploy-dev` | `github-oidc` |
 
 ## Excepciones
 
@@ -71,6 +72,7 @@ Con `product = "ejemplo"`, `environment = "dev"` y `backend_service_name = "api"
 | Secreto de la contraseña de la base | Lo nombra RDS (`rds!db-...`) | RDS lo crea y no permite elegir el nombre. |
 | Bucket de state | `tfstate-<identificador>-<account_id>` | Se crea una vez por cuenta, con `bootstrap`, antes que cualquier producto. |
 | Zona de Route 53 | El dominio | Su nombre es el dominio mismo. |
+| Proveedor OIDC de GitHub | `token.actions.githubusercontent.com` | AWS lo identifica por su URL. Se crea una vez por cuenta, con `bootstrap`. |
 
 ## Producto, no cliente, en el nombre
 
