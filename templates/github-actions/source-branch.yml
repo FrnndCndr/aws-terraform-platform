@@ -1,0 +1,18 @@
+name: source-branch
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  source-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require dev as the source branch
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [ "$HEAD_REF" != "dev" ]; then
+            echo "Pull requests to main must come from dev, not $HEAD_REF" >&2
+            exit 1
+          fi
