@@ -35,3 +35,9 @@ variable "noncurrent_version_expiration_days" {
     error_message = "noncurrent_version_expiration_days must be greater than zero."
   }
 }
+
+variable "create_github_oidc_provider" {
+  type        = bool
+  description = "Creates the GitHub OIDC provider of the account. False when the client does not use GitHub Actions or the account already has it."
+  default     = false
+}
