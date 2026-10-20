@@ -42,6 +42,12 @@ El bucket lleva `prevent_destroy`: un `terraform destroy` sobre `bootstrap` fall
 
 El bloqueo de ejecuciones simultáneas usa el mecanismo nativo de S3 (`use_lockfile`), que se configura en el backend de cada stack. `bootstrap` no crea nada para el bloqueo: es un recurso menos que pagar y mantener.
 
+## Proveedor OIDC de GitHub opcional
+
+Una cuenta admite un solo proveedor OIDC por URL, y `dev` y `prod` de un producto comparten la cuenta. Por eso el proveedor `token.actions.githubusercontent.com` se crea aquí, una vez por cuenta, y no en el stack de un entorno.
+
+Se crea solo con `create_github_oidc_provider = true`. Queda en `false` cuando el cliente no usa GitHub Actions, o cuando su cuenta ya tiene el proveedor: en ese caso los stacks usan el existente, que buscan por su URL.
+
 ## Tags en inglés
 
 Los tags son `client`, `project` y `managed_by`, igual que el resto de los identificadores del código.
