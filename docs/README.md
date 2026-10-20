@@ -7,6 +7,8 @@
 - [Entornos y perfiles](architecture/environments.md): perfiles `minimal` y `production`, y cómo se combinan los archivos de variables.
 - [Costos del entorno dev](architecture/costs.md): cada servicio con su especificación y costo mensual.
 - [State y backend](architecture/state-and-backend.md): dónde guarda Terraform el state y cómo se aísla cada cliente.
+- [Despliegue de la aplicación](architecture/deployment.md): pipeline de GitHub Actions, ramas y entornos, scripts de despliegue manual.
+- [Acceso a la base de datos](architecture/database-access.md): túnel de Session Manager para DBeaver o psql.
 
 ## Módulos
 
@@ -22,6 +24,7 @@ Cada módulo tiene tres documentos: `requirements.md` (qué debe hacer), `interf
 - [uploads-bucket](modules/uploads-bucket/requirements.md): bucket de archivos subidos por los usuarios.
 - [acm-certificate](modules/acm-certificate/requirements.md): certificado HTTPS de un dominio propio.
 - [app-secrets](modules/app-secrets/requirements.md): secretos de la aplicación, creados vacíos.
+- [github-oidc](modules/github-oidc/requirements.md): roles que GitHub Actions asume para desplegar.
 
 ## Stacks
 
