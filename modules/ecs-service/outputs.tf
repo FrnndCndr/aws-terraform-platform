@@ -8,6 +8,21 @@ output "service_name" {
   value       = aws_ecs_service.this.name
 }
 
+output "service_arn" {
+  description = "ARN of the ECS service. Resource of the deploy permission."
+  value       = aws_ecs_service.this.id
+}
+
+output "task_definition_family" {
+  description = "Family of the task definition. The deployment takes its latest revision."
+  value       = aws_ecs_task_definition.this.family
+}
+
+output "container_name" {
+  description = "Name of the container inside the task definition. The deployment changes the image of this container."
+  value       = local.container_definition.name
+}
+
 output "security_group_id" {
   description = "Security group of the tasks. Other modules allow traffic from it."
   value       = aws_security_group.service.id
