@@ -41,6 +41,8 @@ La versión mínima de Terraform y la del provider de AWS se declaran en el stac
 | `static-site` | `uploads-bucket` | Dominio del sitio, origen autorizado por CORS |
 | `uploads-bucket` | `ecs-service` | Nombre del bucket y política de acceso |
 | `ecr` | `ecs-service` | Repositorio de la imagen |
+| `ecr`, `ecs-service` | `github-oidc` | Repositorio, servicio y roles del servicio, recursos del rol del backend |
+| `static-site` | `github-oidc` | Bucket y distribución, recursos del rol del frontend |
 
 Varias conexiones van en ambos sentidos entre los mismos módulos. Terraform lo admite porque las dependencias se resuelven entre recursos, no entre módulos: el security group del backend no depende de la base, y la regla de la base que lo autoriza sí.
 
@@ -50,7 +52,17 @@ Sin NAT Gateway, las tareas van en las subnets públicas con IP pública: es su 
 
 ## Imagen del backend
 
-Por defecto, la tarea usa la imagen del repositorio ECR del entorno con la etiqueta `backend_image_tag`. Mientras no exista la imagen propia, `backend_image` apunta a una imagen pública (por ejemplo `nginx`) para comprobar que todo el camino funciona. Publicar una versión nueva es subir la imagen, cambiar la etiqueta y aplicar.
+`backend_image_tag` (o `backend_image`) es la imagen con que se crea el servicio. Mientras no exista la imagen propia, `backend_image` apunta a una imagen pública (por ejemplo `nginx`) para comprobar que todo el camino funciona.
+
+Las versiones siguientes no se publican con Terraform: las despliega el pipeline de GitHub Actions, o `scripts/deploy-backend.ps1`. Cambiar la etiqueta y aplicar solo registra una revisión de la definición de tarea, que entra con el siguiente despliegue. El motivo está en `docs/modules/ecs-service/design.md`, y el flujo completo en `docs/architecture/deployment.md`.
+
+## Roles de despliegue opcionales
+
+Con `github_owner`, el stack crea los roles que GitHub Actions asume para desplegar el backend y el frontend de este entorno. Busca el proveedor OIDC de la cuenta por su URL; lo crea `bootstrap`, o ya existía. Sin `github_owner`, no crea roles ni busca el proveedor: el entorno se despliega con los scripts.
+
+`github_environment` vale por defecto lo mismo que `environment`. Se cambia cuando el environment de GitHub tiene otro nombre, por ejemplo `production` para `prod`.
+
+Cuando los repositorios cambian de organización, se cambia `github_owner` (y `github_owner_id` con el formato inmutable) y se aplica: los roles pasan a confiar en la organización nueva.
 
 ## Dominio propio opcional
 
