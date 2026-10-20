@@ -9,6 +9,7 @@
 | `region` | `string` | No | `us-east-1` | Región donde se crea el bucket. |
 | `project` | `string` | No | `aws-terraform-platform` | Valor del tag `project` en los recursos. |
 | `noncurrent_version_expiration_days` | `number` | No | `90` | Días que se conserva una versión antigua del state antes de eliminarse. |
+| `create_github_oidc_provider` | `bool` | No | `false` | Crea el proveedor OIDC de GitHub de la cuenta. `false` si el cliente no usa GitHub Actions o si la cuenta ya lo tiene. |
 
 ## Salidas
 
@@ -17,6 +18,7 @@
 | `bucket_name` | Nombre del bucket. Es el valor de `bucket` al inicializar el backend de un stack. |
 | `bucket_arn` | ARN del bucket. |
 | `bucket_region` | Región del bucket. Es el valor de `region` al inicializar el backend de un stack. |
+| `github_oidc_provider_arn` | ARN del proveedor OIDC de GitHub. `null` si no se creó. |
 
 ## Tags
 
@@ -37,6 +39,8 @@ terraform -chdir=bootstrap init
 terraform -chdir=bootstrap workspace new <client>
 terraform -chdir=bootstrap apply -var="client=<client>" -var="aws_profile=<aws_profile>"
 ```
+
+Con despliegue desde GitHub Actions, se agrega `-var="create_github_oidc_provider=true"`. Se puede agregar después sobre un cliente ya creado: solo crea el proveedor.
 
 Para volver a trabajar sobre un cliente ya creado:
 
