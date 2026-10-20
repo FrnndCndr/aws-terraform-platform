@@ -1,0 +1,118 @@
+name: deploy-backend
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+env:
+  DOCKERFILE: Dockerfile
+  BUILD_CONTEXT: .
+  DOCKER_PLATFORM: linux/amd64
+  VERSION_COMMAND: grep -oPm1 '(?<=<Version>)[^<]+' *.csproj
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-backend-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Resolve image tag
+        id: image
+        env:
+          ECR_REPOSITORY_URL: ${{ vars.ECR_REPOSITORY_URL }}
+        run: |
+          version="$(eval "$VERSION_COMMAND")"
+          if [ -z "$version" ]; then
+            echo "Could not resolve the version" >&2
+            exit 1
+          fi
+          tag="${version}-${GITHUB_SHA::7}"
+          repository="${ECR_REPOSITORY_URL#*/}"
+          if aws ecr describe-images --repository-name "$repository" --image-ids imageTag="$tag" > /dev/null 2>&1; then
+            exists=true
+          else
+            exists=false
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "uri=${ECR_REPOSITORY_URL}:${tag}" >> "$GITHUB_OUTPUT"
+          echo "exists=$exists" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to ECR
+        if: steps.image.outputs.exists == 'false'
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build image
+        if: steps.image.outputs.exists == 'false'
+        env:
+          IMAGE_URI: ${{ steps.image.outputs.uri }}
+        run: docker build --platform "$DOCKER_PLATFORM" -f "$DOCKERFILE" -t "$IMAGE_URI" "$BUILD_CONTEXT"
+
+      - name: Check the image has no .env files
+        if: steps.image.outputs.exists == 'false'
+        env:
+          IMAGE_URI: ${{ steps.image.outputs.uri }}
+        run: |
+          found="$(docker run --rm --user 0 --entrypoint sh "$IMAGE_URI" -c "find / -name '.env*' -not -path '/proc/*' -not -path '/sys/*' 2>/dev/null")"
+          if [ -n "$found" ]; then
+            echo "$found" >&2
+            exit 1
+          fi
+
+      - name: Push image
+        if: steps.image.outputs.exists == 'false'
+        env:
+          IMAGE_URI: ${{ steps.image.outputs.uri }}
+        run: docker push "$IMAGE_URI"
+
+      - name: Register task definition revision
+        id: task
+        env:
+          IMAGE_URI: ${{ steps.image.outputs.uri }}
+          TASK_DEFINITION_FAMILY: ${{ vars.TASK_DEFINITION_FAMILY }}
+          CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
+        run: |
+          aws ecs describe-task-definition --task-definition "$TASK_DEFINITION_FAMILY" --query taskDefinition --output json > current.json
+          jq --arg name "$CONTAINER_NAME" --arg image "$IMAGE_URI" '
+            del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)
+            | (.containerDefinitions[] | select(.name == $name) | .image) = $image
+          ' current.json > new.json
+          arn="$(aws ecs register-task-definition --cli-input-json file://new.json --query taskDefinition.taskDefinitionArn --output text)"
+          echo "arn=$arn" >> "$GITHUB_OUTPUT"
+
+      - name: Update service
+        env:
+          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+          ECS_SERVICE: ${{ vars.ECS_SERVICE }}
+          TASK_DEFINITION_ARN: ${{ steps.task.outputs.arn }}
+        run: |
+          aws ecs update-service --cluster "$ECS_CLUSTER" --service "$ECS_SERVICE" --task-definition "$TASK_DEFINITION_ARN" > /dev/null
+          aws ecs wait services-stable --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE"
+
+      - name: Check health
+        env:
+          HEALTH_URL: ${{ vars.HEALTH_URL }}
+        run: |
+          for attempt in $(seq 1 30); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' "$HEALTH_URL" || true)"
+            echo "attempt $attempt: $status"
+            if [ "$status" = "200" ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1
