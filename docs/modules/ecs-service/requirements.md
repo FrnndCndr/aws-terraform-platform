@@ -14,6 +14,8 @@ Ejecutar el backend como un servicio de contenedores en ECS Fargate, registrado 
 6. Solo acepta tráfico en el puerto del contenedor desde los security groups indicados.
 7. Revierte un despliegue que no logra arrancar tareas sanas.
 8. De forma opcional, permite abrir una terminal dentro del contenedor (ECS Exec) y definir un health check del contenedor.
+9. La imagen indicada es solo la inicial: después de crear el servicio, las versiones nuevas las despliega el pipeline o el script de despliegue, y un `apply` nunca devuelve el servicio a otra imagen.
+10. Entrega como salida los datos que necesita ese despliegue: ARN del servicio, familia de la definición de tarea y nombre del contenedor.
 
 ## Qué no hace
 
