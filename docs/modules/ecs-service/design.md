@@ -33,6 +33,19 @@ La configuración de salud del registro usa `failure_threshold = 1`. AWS marcó 
 
 El security group de las tareas solo abre el puerto del contenedor a los security groups de `ingress_security_group_ids`. Aunque la tarea tenga IP pública, nadie más puede conectarse. La salida a internet queda abierta, porque la tarea necesita bajar su imagen y hablar con servicios de AWS.
 
+## La imagen la despliega el pipeline, no Terraform
+
+Terraform compara el código con lo que existe en AWS y, en cada `apply`, corrige las diferencias. Si el pipeline despliega la versión `0.3.0` y el código dice `0.2.0`, el siguiente `apply`, aunque sea para cambiar otra cosa, devolvería el backend a `0.2.0`.
+
+Para evitarlo, el servicio ignora qué definición de tarea está usando (`ignore_changes = [task_definition]`). Las responsabilidades quedan separadas:
+
+- **Terraform** crea el servicio y es dueño de la definición de tarea: CPU, memoria, variables de entorno, secretos, registros, roles y la imagen inicial.
+- **El pipeline** (o `scripts/deploy-backend.ps1`) despliega versiones: toma la última revisión de la familia, cambia solo la imagen, registra una revisión nueva y actualiza el servicio.
+
+Consecuencia: un cambio de la definición de tarea hecho con Terraform, por ejemplo una variable de entorno nueva, registra una revisión, pero el servicio no la usa hasta el siguiente despliegue. Como el despliegue parte de la última revisión, el cambio no se pierde: entra con la próxima versión, o antes si se lanza un despliegue a mano.
+
+`lifecycle` no admite valores que vengan de variables, así que el comportamiento es el mismo para todos los entornos y clientes.
+
 ## Despliegues que se revierten solos
 
 El circuit breaker de ECS detecta un despliegue cuyas tareas no logran arrancar y vuelve a la versión anterior. Sin él, una imagen rota deja el servicio reintentando sin fin.
