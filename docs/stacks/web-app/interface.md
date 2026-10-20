@@ -38,8 +38,8 @@
 | Nombre | Tipo | Obligatoria | Valor por defecto | Descripción |
 |---|---|---|---|---|
 | `backend_service_name` | `string` | No | `backend` | Propósito del servicio del backend en los nombres, y nombre de su contenedor. |
-| `backend_image` | `string` | No | `null` | Imagen completa del backend. `null` usa el repositorio ECR del entorno con `backend_image_tag`. |
-| `backend_image_tag` | `string` | No | `latest` | Etiqueta de la imagen en el repositorio ECR. |
+| `backend_image` | `string` | No | `null` | Imagen inicial completa del backend. `null` usa el repositorio ECR del entorno con `backend_image_tag`. |
+| `backend_image_tag` | `string` | No | `latest` | Etiqueta de la imagen inicial en el repositorio ECR. Las versiones siguientes las despliega el pipeline. |
 | `backend_container_port` | `number` | No | `8080` | Puerto en el que escucha el backend. |
 | `backend_cpu` | `number` | No | `256` | CPU de la tarea (1024 = 1 vCPU). |
 | `backend_memory` | `number` | No | `512` | Memoria de la tarea, en MB. |
@@ -78,6 +78,20 @@
 |---|---|---|---|---|
 | `uploads_versioning` | `bool` | No | `false` | Versionado del bucket de archivos. |
 | `uploads_force_destroy` | `bool` | No | `false` | Permite destruir el bucket de archivos aunque tenga contenido. |
+
+### Despliegue desde GitHub Actions
+
+| Nombre | Tipo | Obligatoria | Valor por defecto | Descripción |
+|---|---|---|---|---|
+| `github_owner` | `string` | No | `null` | Organización o usuario de GitHub dueño de los repositorios. `null` no crea roles de despliegue. |
+| `github_backend_repository` | `string` | No | `null` | Repositorio del backend, sin el owner. `null` no crea el rol del backend. |
+| `github_frontend_repository` | `string` | No | `null` | Repositorio del frontend, sin el owner. `null` no crea el rol del frontend. |
+| `github_environment` | `string` | No | `null` | Environment de GitHub desde el que se despliega. `null` usa el valor de `environment`. |
+| `github_owner_id` | `string` | No | `null` | Id numérico de la organización. Con él, los roles usan el formato inmutable del `sub`. Ver `docs/modules/github-oidc/design.md`. |
+| `github_backend_repository_id` | `string` | No | `null` | Id numérico del repositorio del backend. Obligatorio con `github_owner_id`. |
+| `github_frontend_repository_id` | `string` | No | `null` | Id numérico del repositorio del frontend. Obligatorio con `github_owner_id`. |
+
+Con `github_owner`, al menos uno de los dos repositorios es obligatorio, y la cuenta debe tener el proveedor OIDC de GitHub (ver `bootstrap`). Si los repositorios emiten el formato inmutable del `sub`, se agregan los tres id.
 
 ## Variables de entorno que recibe el backend
 
@@ -131,6 +145,10 @@ Si `backend_environment` repite un nombre de la tabla de arriba, prevalece el de
 | `db_address` | Dirección de la base. |
 | `db_secret_arn` | Secreto con el usuario y la contraseña de la base. |
 | `uploads_bucket_name` | Bucket de archivos subidos. |
+| `ecs_task_definition_family` | Familia de la definición de tarea del backend. El despliegue toma su última revisión. |
+| `backend_container_name` | Contenedor del backend dentro de la definición de tarea. |
+| `github_backend_role_arn` | Rol que asume el workflow del backend. `null` sin despliegue desde GitHub. |
+| `github_frontend_role_arn` | Rol que asume el workflow del frontend. `null` sin despliegue desde GitHub. |
 
 ## Archivos de variables
 
@@ -163,6 +181,22 @@ backend_container_port = 80
 ```hcl
 dns_zone_name    = "ejemplo.cl"
 site_domain_name = "dev.ejemplo.cl"
+```
+
+Con despliegue desde GitHub Actions se agregan:
+
+```hcl
+github_owner               = "ejemplo-org"
+github_backend_repository  = "ejemplo-api"
+github_frontend_repository = "ejemplo-web"
+```
+
+Si los repositorios emiten el formato inmutable del `sub`, se agregan sus id:
+
+```hcl
+github_owner_id               = "100000001"
+github_backend_repository_id  = "200000001"
+github_frontend_repository_id = "200000002"
 ```
 
 Solo `clientes/ejemplo/` se versiona. Los archivos de productos reales quedan fuera del repositorio.
