@@ -238,6 +238,10 @@ resource "aws_ecs_service" "this" {
     rollback = true
   }
 
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
+
   depends_on = [
     aws_iam_role_policy_attachment.execution,
     aws_iam_role_policy.read_secrets,
